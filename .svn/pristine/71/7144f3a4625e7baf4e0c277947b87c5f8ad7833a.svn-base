@@ -1,0 +1,294 @@
+package fundamentos.regex.exemplos.sw04Regex.view;
+
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+import javax.swing.text.DateFormatter;
+import javax.swing.text.NumberFormatter;
+
+import fundamentos.lib.OptionalTextField;
+import fundamentos.regex.exemplos.sw04Regex.model.Alimenticios;
+import fundamentos.regex.exemplos.sw04Regex.model.Eletrodomesticos;
+import fundamentos.regex.exemplos.sw04Regex.model.Produto;
+import objeto.resposta.lib.StatusValidador;
+import objeto.resposta.lib.SwUtil;
+import objeto.resposta.lib.VerificaData;
+import objeto.resposta.lib.VerificaInteiro;
+import objeto.resposta.lib.VerificaRegex;
+import objeto.resposta.lib.VerificaValor;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+
+@SuppressWarnings("serial")
+public class CadProdutosRegex extends JFrame implements ActionListener, ChangeListener {
+	private JPanel contentPane;
+	private JLabel lblCd;
+	private JTextField tfCod;
+	private JLabel lblDescr;
+	private JTextField tfDescr;
+	private JLabel lblValor;
+	private JFormattedTextField tfValor;
+	private JTabbedPane tabbedPane;
+	private JPanel pnAli;
+	private JPanel pnEle;
+	private JLabel lblDataDeValidade;
+	private OptionalTextField tfValidade;
+	private JLabel lblDataDeProduo;
+	private OptionalTextField tfProducao;
+	private JLabel lblCdFornecedor;
+	private OptionalTextField tfCodForn;
+	private JLabel lblNomeDoFornecedor;
+	private OptionalTextField tfNomeForn;
+	private JButton btnInserir;
+	private JButton btnListar;
+	private JButton btnSair;
+
+	private List<Produto> lista = new ArrayList<>();
+	private JLabel errCod;
+	private JLabel errValor;
+	private JLabel errVal;
+	private JLabel errPro;
+	private JLabel errFor;
+
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					CadProdutosRegex frame = new CadProdutosRegex();
+					frame.setLocationRelativeTo(null);
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	public CadProdutosRegex() {
+		setResizable(false);
+		setTitle("Cad. Produtos");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 410);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+
+		errCod = new JLabel(" ");
+		errCod.setBounds(200, 16, 239, 16);
+		errCod.setForeground(Color.RED);
+
+		lblCd = new JLabel("C\u00F3d.");
+		lblCd.setBounds(11, 16, 29, 16);
+
+		tfCod = new JTextField();
+		tfCod.setBounds(52, 11, 130, 26);
+		tfCod.setColumns(10);
+		tfCod.setInputVerifier(new VerificaRegex(errCod, "[0-9]{3}/[0-9]{2}"));
+
+		lblDescr = new JLabel("Descr.");
+		lblDescr.setBounds(11, 54, 40, 16);
+
+		tfDescr = new JTextField();
+		tfDescr.setBounds(63, 49, 317, 26);
+		tfDescr.setColumns(10);
+
+		errValor = new JLabel(" ");
+		errValor.setBounds(203, 98, 236, 16);
+		errValor.setForeground(Color.RED);
+
+		lblValor = new JLabel("Valor");
+		lblValor.setBounds(11, 98, 32, 16);
+
+		tfValor = new JFormattedTextField(new NumberFormatter(NumberFormat.getNumberInstance()));
+		tfValor.setBounds(55, 93, 130, 26);
+		tfValor.setFocusLostBehavior(JFormattedTextField.COMMIT);
+		tfValor.setColumns(10);
+		tfValor.setInputVerifier(new VerificaValor(errValor));
+
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBounds(11, 137, 428, 164);
+
+		btnInserir = new JButton("Inserir");
+		btnInserir.setBounds(11, 348, 84, 29);
+		btnInserir.addActionListener(this);
+
+		btnListar = new JButton("Listar");
+		btnListar.setBounds(188, 348, 79, 29);
+		btnListar.setVerifyInputWhenFocusTarget(false);
+		btnListar.addActionListener(this);
+
+		btnSair = new JButton("Sair");
+		btnSair.setBounds(364, 348, 75, 29);
+		btnSair.setVerifyInputWhenFocusTarget(false);
+		btnSair.addActionListener(this);
+
+		pnAli = new JPanel();
+		tabbedPane.addTab("Aliment\u00EDcios", null, pnAli, null);
+
+		errVal = new JLabel(" ");
+		errVal.setBounds(259, 19, 142, 16);
+		errVal.setForeground(Color.RED);
+
+		lblDataDeValidade = new JLabel("Data de Validade");
+		lblDataDeValidade.setBounds(6, 19, 105, 16);
+		
+		DateFormat df = DateFormat.getDateInstance();
+		df.setLenient(false);		                                   // reforçar a validação da data
+		
+		tfValidade = new OptionalTextField(new DateFormatter(df)); 
+		tfValidade.setBounds(123, 14, 130, 26);
+		tfValidade.setFocusLostBehavior(JFormattedTextField.COMMIT);
+		tfValidade.setColumns(10);
+		tfValidade.setInputVerifier(new VerificaData(errVal, df)); 	   // passar para o validador reforçar a validação da data
+
+		errPro = new JLabel(" ");
+		errPro.setBounds(264, 63, 137, 16);
+		errPro.setForeground(Color.RED);
+
+		lblDataDeProduo = new JLabel("Data de Produção");
+		lblDataDeProduo.setBounds(6, 63, 110, 16);
+
+		tfProducao = new OptionalTextField(new DateFormatter(df));
+		tfProducao.setBounds(128, 58, 130, 26);
+		tfProducao.setFocusLostBehavior(JFormattedTextField.COMMIT);
+		tfProducao.setColumns(10);
+		tfProducao.setInputVerifier(new VerificaData(errPro, df));
+		pnAli.setLayout(null);
+		pnAli.add(lblDataDeValidade);
+		pnAli.add(tfValidade);
+		pnAli.add(errVal);
+		pnAli.add(lblDataDeProduo);
+		pnAli.add(tfProducao);
+		pnAli.add(errPro);
+
+		pnEle = new JPanel();
+		tabbedPane.addTab("Eletrodom\u00E9sticos", null, pnEle, null);
+
+		errFor = new JLabel(" ");
+		errFor.setBounds(257, 11, 144, 16);
+		errFor.setForeground(Color.RED);
+
+		lblCdFornecedor = new JLabel("C\u00F3d. Fornecedor");
+		lblCdFornecedor.setBounds(6, 11, 103, 16);
+
+		tfCodForn = new OptionalTextField(new NumberFormatter(
+				NumberFormat.getIntegerInstance()));
+		tfCodForn.setBounds(121, 6, 130, 26);
+		tfCodForn.setFocusLostBehavior(JFormattedTextField.COMMIT);
+		tfCodForn.setColumns(10);
+		tfCodForn.setInputVerifier(new VerificaInteiro(errFor));
+
+		lblNomeDoFornecedor = new JLabel("Nome do Fornecedor");
+		lblNomeDoFornecedor.setBounds(6, 55, 131, 16);
+
+		tfNomeForn = new OptionalTextField();
+		tfNomeForn.setBounds(149, 50, 252, 26);
+		tfNomeForn.setColumns(10);
+		pnEle.setLayout(null);
+		pnEle.add(lblCdFornecedor);
+		pnEle.add(tfCodForn);
+		pnEle.add(errFor);
+		pnEle.add(lblNomeDoFornecedor);
+		pnEle.add(tfNomeForn);
+		
+		getRootPane().setDefaultButton(btnInserir);
+		contentPane.setLayout(null);
+		contentPane.add(tabbedPane);
+		contentPane.add(lblCd);
+		contentPane.add(tfCod);
+		contentPane.add(errCod);
+		contentPane.add(lblDescr);
+		contentPane.add(tfDescr);
+		contentPane.add(lblValor);
+		contentPane.add(tfValor);
+		contentPane.add(errValor);
+		contentPane.add(btnInserir);
+		contentPane.add(btnListar);
+		contentPane.add(btnSair);
+
+		// TODO: explicar porque ocorre NullPointerExecpition
+		tabbedPane.addChangeListener(this);
+		tfValidade.setOptional(false);
+		tfProducao.setOptional(false);
+		tfNomeForn.setOptional(true);
+		tfCodForn.setOptional(true);
+	}
+
+	public void actionPerformed(ActionEvent ev) {
+		Object botao = ev.getSource();
+
+		DateFormat dateFormat = DateFormat.getDateInstance();
+
+		if (botao.equals(btnInserir)) {
+			StatusValidador status = SwUtil.verificaStatus(this);
+			if(status.equals(StatusValidador.OK)) {
+				int tab = tabbedPane.getSelectedIndex();
+				if (tab == 0) {
+					Alimenticios obj = new Alimenticios();
+					obj.setCodigo(tfCod.getText());
+					obj.setDescr(tfDescr.getText());
+					obj.setValor(((Number) tfValor.getValue()).doubleValue());
+					obj.setDataValidade(dateFormat.format(tfValidade.getValue()));
+					obj.setDataProduzido(dateFormat.format(tfProducao.getValue()));
+
+					lista.add(obj);
+				} else {
+					Eletrodomesticos obj = new Eletrodomesticos();
+					obj.setCodigo(tfCod.getText());
+					obj.setDescr(tfDescr.getText());
+					obj.setValor(((Number) tfValor.getValue()).doubleValue());
+					obj.setCodFornecedor(((Number) tfCodForn.getValue()).intValue());
+					obj.setNomeFornecedor(tfNomeForn.getText());
+
+					lista.add(obj);
+				}
+				SwUtil.limpa(this);
+				tfCod.requestFocus();
+			} else if(status.equals(StatusValidador.EM_BRANCO)) {
+				JOptionPane.showMessageDialog(this, "Existem campos que não foram preenchidos");
+			} else {
+				JOptionPane.showMessageDialog(this, "Existem campos com erros");
+			}
+		} else if (botao.equals(btnListar)) {
+			String msg = "Cad. Produtos\n\n";
+			for (Produto obj : lista) {
+				msg += obj + "\n";
+			}
+			JOptionPane.showMessageDialog(this, msg);
+			tfCod.requestFocus();
+		} else {
+			System.exit(0);
+		}
+	}
+	
+	public void stateChanged(ChangeEvent ev) {
+		Object painel = ev.getSource();
+		
+		if(painel.equals(pnAli)) {
+			tfValidade.setOptional(false);
+			tfProducao.setOptional(false);
+			tfNomeForn.setOptional(true);
+			tfCodForn.setOptional(true);
+		} else {
+			tfValidade.setOptional(true);
+			tfProducao.setOptional(true);
+			tfNomeForn.setOptional(false);
+			tfCodForn.setOptional(false);
+		}
+	}
+}
