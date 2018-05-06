@@ -1,17 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package Compilador;
 
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author Perretto
- */
+
 public class Analisador {
     public String chave[]=new String [100];
     public String pr[]=new String [100];
@@ -19,7 +12,12 @@ public class Analisador {
     public String retorno_erro;
     private boolean valuesSintatico = false;
 
-     
+    
+    
+    //////// ANALISADO LEXICO ////////
+    
+    
+    
     public boolean lexico(String n) {
         boolean retorno = false;
         int i = 0;
@@ -29,23 +27,19 @@ public class Analisador {
         String nn="";
         n=n.replace("'","");
         
-        ConexaoBD con = new ConexaoBD();
-
         try {
-            con.conexaoLog("lexico", true, "Iniciando analise lexica");
-            // } catch (java.sql.SQLIntegrityConstraintViolationException e) {
-            //     JOptionPane.showMessageDialog(null, "Não foi possível salvar o log no banco de dados");
-            // }
-            
-            while (i < n.length()) {
+            ConexaoBD.conexaoLog("lexico", true, "Iniciando analise lexica");
+
+            //Inicio da analise do codigo SQL
+            while (i < n.length()) { //I = Numeros de caracteres
                 nn=String.valueOf(n.charAt(i));
                 if (n.charAt(i) == ' ') {
                     if (n.charAt(i - 1) != ',' && n.charAt(i - 1) != '(' && n.charAt(i - 1) != ')' ) {
-                        if (!"".equals(token)) { //   
+                        if (!"".equals(token)) {    
                         vet[j] = token;
                             token = "";
                             j++;
-                        }//
+                        }
                     }
                 } else if (n.charAt(i) == ',' || n.charAt(i) == '(' || n.charAt(i) == ')' || n.charAt(i) == ';' || n.charAt(i) == '='  || "'".equals(nn)  ) {
                     if (!token.equals("")  || "'".equals(nn) ) {
@@ -76,23 +70,23 @@ public class Analisador {
             if (!token.equals("")) {
                 vet[j] = token;
                 j++;
-                System.out.println("j" + j);
+                System.out.println("j" + j); //LOG////
             }
             j--;
 
-            con.conexaoLog("lexico", true, "Palavras inseridas analisadas");
+            ConexaoBD.conexaoLog("lexico", true, "Palavras inseridas analisadas");
 
             for (i = 0; i <= j; i++) {
 
-                con.conexaoLog("lexico", true, "Conectando ao banco para compara dados");
-                con.conexaolec(vet[i], i, this.chave, this.pr, this.tipo);
+                ConexaoBD.conexaoLog("lexico", true, "Conectando ao banco para compara dados");
+                ConexaoBD.conexaolec(vet[i], i, this.chave, this.pr, this.tipo);
 
             }
 
             retorno = true;
 
-            con.conexaoLog("lexico", true, "Realizando comparacao com os dados do banco");
-            con.conexaoLog("lexico", true, "Analisador lexico executado com sucesso");
+            ConexaoBD.conexaoLog("lexico", true, "Realizando comparacao com os dados do banco");
+            ConexaoBD.conexaoLog("lexico", true, "Analisador lexico executado com sucesso");
 
             return (retorno);
         } catch (SQLException ex) {
@@ -102,19 +96,17 @@ public class Analisador {
 
     }
 
+    
+    
+    //////// ANALISADO SINTATICO ////////
+    
+    
+    
     public boolean sintatico(String n) {
-        ConexaoBD con = new ConexaoBD();
         try {
-            con.conexaoLog("sintatico", true, "Iniciando a analise sintatica");
+            ConexaoBD.conexaoLog("sintatico", true, "Iniciando a analise sintatica");
 
-
-            //for (int u = 0; u < 100; u++) {
-                //System.out.println("|" + chave[u] + "|" + pr[u] + "|" + tipo[u] + "|");
-            //}
             n=n.replace("'","");
-            
-            
-            
             
             for (int u = 0; u < 100; u++) {
                 if (pr[u] != null) {
@@ -126,10 +118,7 @@ public class Analisador {
                 }
             }
 
-            //for (int u = 0; u < 100; u++) {
-                //System.out.println("|" + chave[u] + "|" + pr[u] + "|" + tipo[u] + "|");
-            //}
-            ConexaoBD.conexaoLog("sintatico", true, "Endetificando comando");
+            ConexaoBD.conexaoLog("sintatico", true, "Identificando comando");
         } catch (SQLException ex) {
             Logger.getLogger(Analisador.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -142,20 +131,19 @@ public class Analisador {
         }
         
         
-        ConexaoBD con = new ConexaoBD();
         boolean retorno = false;
         try {
             if (pr[0].equals("SELECT")) {
-                con.conexaoLog("sintatico", true, "Executando a analise sintatica do SELECT");
+                ConexaoBD.conexaoLog("sintatico", true, "Executando a analise sintatica do SELECT");
                 retorno = sintaticoSELECT(1);
             }
             if (pr[0].equals("INSERT")) {
                 valuesSintatico = false;
-                con.conexaoLog("sintatico", true, "Executando a analise sintatica do INSERT");
+                ConexaoBD.conexaoLog("sintatico", true, "Executando a analise sintatica do INSERT");
                 retorno = sintaticoINSERT(1);
             }
             if (pr[0].equals("DELETE")) {
-                con.conexaoLog("sintatico", true, "Executando a analise sintatica do DELETE");
+                ConexaoBD.conexaoLog("sintatico", true, "Executando a analise sintatica do DELETE");
                 retorno = sintaticoDELETE(1);
             }
         } catch (SQLException ex) {
@@ -283,7 +271,7 @@ public class Analisador {
             if (tipo[ponteiro].equals("id")) {
                 if (pr[ponteiro + 1] == null) {
                     retorno = true;
-                    System.out.println("Final da compilação em id");
+                    System.out.println("Final da compilacao em id");
                 } else if (pr[ponteiro + 1].equals("WHERE")) {
                     retorno = sintaticoWHERE(ponteiro + 2);
                 }
@@ -305,7 +293,7 @@ public class Analisador {
                         if (pr[ponteiro + 3] == null) {
                             System.out.println(ponteiro);
                             retorno = true;
-                            System.out.println("Final da compilação em WHERE ID = ID");
+                            System.out.println("Final da compila��o em WHERE ID = ID");
                         } else if (pr[ponteiro + 3].equals("AND")) {
                             System.out.println("passou aki AND");
                             retorno = sintaticoWHERE(ponteiro + 4);
@@ -324,14 +312,11 @@ public class Analisador {
     
     
     
-    
-    
+    //////// ANALISADO SEMANTICO ////////   
     
     
      
     public String semantico(String n){
-        String retorno;
-        retorno="true";
         String ret;
         ret="";
         ConexaoBD con = new ConexaoBD();
