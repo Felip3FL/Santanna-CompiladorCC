@@ -5,8 +5,8 @@
 </h4>
 
 <h3 align="center">
-<img src="https://img.shields.io/badge/STATUS-EM%20DESENVOLVIMENTO-red">
-<img src="https://img.shields.io/badge/PROJECT%20VERSION-0.0.0-blue">
+<img src="https://img.shields.io/badge/STATUS-EM%20DESENVOLVIMENTO-ef1a24">
+<img src="https://img.shields.io/badge/PROJECT%20VERSION-0.0.0-003f72">
 </h3>
 
 <BR>
